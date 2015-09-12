@@ -12,7 +12,7 @@ use lexer::Token::{Identifier, Colon, Pipe, StringLiteral};
 use lexer::Element;
 use lexer::Element::{Expression, Tag, Raw};
 
-pub fn parse<'a> (elements: &[Element], options: &'a LiquidOptions<'a>) -> Result<Vec<Box<Renderable + 'a>>, String> {
+pub fn parse (elements: &[Element], options: &LiquidOptions) -> Result<Vec<Box<Renderable>>, String> {
     let mut ret = vec![];
     let mut iter = elements.iter();
     let mut token = iter.next();
@@ -28,7 +28,7 @@ pub fn parse<'a> (elements: &[Element], options: &'a LiquidOptions<'a>) -> Resul
 }
 
 // creates an expression, which wraps everything that gets rendered
-fn parse_expression<'a> (tokens: &Vec<Token>, options: &'a LiquidOptions) -> Result<Box<Renderable + 'a>, String> {
+fn parse_expression(tokens: &Vec<Token>, options: &LiquidOptions) -> Result<Box<Renderable>, String> {
     match tokens[0] {
         Identifier(ref x) if options.tags.contains_key(&x.to_string()) => {
             Ok(options.tags.get(x).unwrap().initialize(&x, &tokens[1..], options))
@@ -38,7 +38,7 @@ fn parse_expression<'a> (tokens: &Vec<Token>, options: &'a LiquidOptions) -> Res
 }
 
 // creates an output, basically a wrapper around values, variables and filters
-fn parse_output<'a> (tokens: &Vec<Token>) -> Result<Box<Renderable + 'a>, String> {
+fn parse_output(tokens: &Vec<Token>) -> Result<Box<Renderable>, String> {
     let entry = match tokens[0] {
         Identifier(ref x) => VarOrVal::Var(Variable::new(&x)),
         StringLiteral(ref x) => VarOrVal::Val(Value::Str(x.to_string())),
@@ -87,7 +87,7 @@ fn parse_output<'a> (tokens: &Vec<Token>) -> Result<Box<Renderable + 'a>, String
 // a tag can be either a single-element tag or a block, which can contain other elements
 // and is delimited by a closing tag named {{end + the_name_of_the_tag}}
 // tags do not get rendered, but blocks may contain renderable expressions
-fn parse_tag<'a> (iter: &mut Iter<Element>, tokens: &Vec<Token>, options: &'a LiquidOptions) -> Result<Box<Renderable + 'a>, String> {
+fn parse_tag(iter: &mut Iter<Element>, tokens: &Vec<Token>, options: &LiquidOptions) -> Result<Box<Renderable>, String> {
     match tokens[0] {
 
         // is a tag

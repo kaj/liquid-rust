@@ -4,7 +4,7 @@
 extern crate regex;
 
 use std::collections::HashMap;
-use template::Template;
+pub use template::Template;
 use lexer::Token;
 use lexer::Element;
 use tags::{IfBlock, ForBlock, RawBlock, CommentBlock};
@@ -39,24 +39,24 @@ impl Default for ErrorMode {
 }
 
 /// A trait for creating custom tags.
-pub trait Tag {
+pub trait Tag : Send {
     fn initialize(&self, tag_name: &str, arguments: &[Token], options : &LiquidOptions) -> Box<Renderable>;
 }
 
 /// The trait to use when implementing custom block-size tags ({% if something %})
-pub trait Block {
-    fn initialize<'a>(&'a self, tag_name: &str, arguments: &[Token], tokens: Vec<Element>, options : &'a LiquidOptions<'a>) -> Result<Box<Renderable +'a>, String>;
+pub trait Block : Send {
+    fn initialize(&self, tag_name: &str, arguments: &[Token], tokens: Vec<Element>, options : &LiquidOptions) -> Result<Box<Renderable>, String>;
 }
 
 /// Any object (tag/block) that can be rendered by liquid must implement this trait.
-pub trait Renderable{
+pub trait Renderable : Send {
     fn render(&self, context: &mut Context) -> Option<String>;
 }
 
 #[derive(Default)]
-pub struct LiquidOptions<'a> {
-    pub blocks : HashMap<String, Box<Block + 'a>>,
-    pub tags : HashMap<String, Box<Tag + 'a>>,
+pub struct LiquidOptions {
+    pub blocks : HashMap<String, Box<Block>>,
+    pub tags : HashMap<String, Box<Tag>>,
     pub error_mode : ErrorMode
 }
 
@@ -77,7 +77,7 @@ pub struct LiquidOptions<'a> {
 /// assert_eq!(output.unwrap(), "Liquid!".to_string());
 /// ```
 ///
-pub fn parse<'a, 'b> (text: &str, options: &'b mut LiquidOptions<'a>) -> Result<Template<'b>, String>{
+pub fn parse(text: &str, options: &mut LiquidOptions) -> Result<Template, String>{
     let tokens = lexer::tokenize(&text);
     options.blocks.insert("raw".to_string(), Box::new(RawBlock) as Box<Block>);
     options.blocks.insert("if".to_string(), Box::new(IfBlock) as Box<Block>);

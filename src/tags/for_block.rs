@@ -15,10 +15,10 @@ use std::default::Default;
 #[cfg(test)]
 use lexer::tokenize;
 
-struct For<'a> {
+struct For {
     var_name: String,
     array_id: String,
-    inner: Template<'a>
+    inner: Template
 }
 
 fn get_array(context: &mut Context, array_id: &str) -> Vec<Value> {
@@ -28,7 +28,7 @@ fn get_array(context: &mut Context, array_id: &str) -> Vec<Value> {
     }
 }
 
-impl<'a> Renderable for For<'a>{
+impl Renderable for For {
     fn render(&self, context: &mut Context) -> Option<String>{
         let arr = get_array(context, &self.array_id);
         let mut ret = String::new();
@@ -42,7 +42,7 @@ impl<'a> Renderable for For<'a>{
 
 
 impl Block for ForBlock{
-    fn initialize<'a>(&'a self, _tag_name: &str, arguments: &[Token], tokens: Vec<Element>, options : &'a LiquidOptions) -> Result<Box<Renderable +'a>, String>{ let mut args = arguments.iter();
+    fn initialize(&self, _tag_name: &str, arguments: &[Token], tokens: Vec<Element>, options : &LiquidOptions) -> Result<Box<Renderable>, String>{ let mut args = arguments.iter();
 
         let inner = try!(parse(&tokens, options));
 

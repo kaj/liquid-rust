@@ -18,12 +18,12 @@ use parser::parse;
 use lexer::Element;
 use lexer::Element::Tag;
 
-struct If<'a>{
+struct If {
     lh : Token,
     comparison : ComparisonOperator,
     rh : Token,
-    if_true: Template<'a>,
-    if_false: Option<Template<'a>>
+    if_true: Template,
+    if_false: Option<Template>
 }
 
 fn token_to_val (token: &Token, context: &Context) -> Result<Value, String> {
@@ -38,7 +38,7 @@ fn token_to_val (token: &Token, context: &Context) -> Result<Value, String> {
     }
 }
 
-impl<'a> If<'a>{
+impl If {
     fn compare(&self, context: &Context) -> Result<bool, String>{
         let a = try!(token_to_val(&self.lh, context));
         let b = try!(token_to_val(&self.rh, context));
@@ -54,7 +54,7 @@ impl<'a> If<'a>{
     }
 }
 
-impl<'a> Renderable for If<'a>{
+impl Renderable for If {
     fn render(&self, context: &mut Context) -> Option<String>{
         if self.compare(context).unwrap_or(false){
             self.if_true.render(context)
@@ -68,7 +68,7 @@ impl<'a> Renderable for If<'a>{
 }
 
 impl Block for IfBlock{
-    fn initialize<'a>(&'a self, _tag_name: &str, arguments: &[Token], tokens: Vec<Element>, options : &'a LiquidOptions) -> Result<Box<Renderable +'a>, String>{
+    fn initialize(&self, _tag_name: &str, arguments: &[Token], tokens: Vec<Element>, options : &LiquidOptions) -> Result<Box<Renderable>, String>{
         let mut args = arguments.iter();
 
         let lh = match args.next() {

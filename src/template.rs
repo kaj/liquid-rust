@@ -2,11 +2,11 @@ use Renderable;
 use context::Context;
 use filters::size;
 
-pub struct Template<'a>{
-    pub elements: Vec<Box<Renderable +'a>>
+pub struct Template {
+    pub elements: Vec<Box<Renderable>>
 }
 
-impl<'a> Renderable for Template<'a> {
+impl Renderable for Template {
     fn render (&self, context: &mut Context) -> Option<String>{
         context.filters.insert("size".to_string(), Box::new(size));
 
@@ -19,8 +19,8 @@ impl<'a> Renderable for Template<'a> {
     }
 }
 
-impl<'a> Template<'a> {
-    pub fn new(elements: Vec<Box<Renderable +'a>>) -> Template<'a> {
+impl Template {
+    pub fn new(elements: Vec<Box<Renderable>>) -> Template {
         Template{elements: elements}
     }
 }
